@@ -1,0 +1,14 @@
+ul.list {
+    width: 300px;
+    height: 300px;
+}
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 60%;
+    align-items: start;
+    justify-content: start;
+    padding: 10px;
+    border-radius: 12px;
+ }
