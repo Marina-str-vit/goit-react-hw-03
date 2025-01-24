@@ -1,67 +1,48 @@
-import { useEffect, useState } from 'react'
-import Description from './components/Description/Description'
-import Options from './components/Options/Options'
-import Feedback from './components/Feedback/Feedback'
-import Notification from './components/Notification/Notification'
-import Chart from './components/Chart/Chart'
-import './App.css'
+import { useState, useEffect } from "react";
+import ContactForm from "./components/ContactForm/ContactForm";
+import ContactList from "./components/ContactList/ContactLisct";
+import SearchBox from "./components/SearchBox/SearchBox";
+import "./App.css";
+import defaultContacts from "./assets/defaultContacts.json";
 
 export default function App() {
-  const [clicks, setClicks] = useState(() => {
-    const savedFeedback = localStorage.getItem("saved-feedback-statistics");
-    if (savedFeedback !== null) {
-      return JSON.parse(savedFeedback);
-    }
-    return { good: 0, neutral: 0, bad: 0 };
+  const [contacts, setContacts] = useState(() => {
+    const savedContacts = localStorage.getItem("saved-contacts");
+    if (savedContacts !== null) {
+      return JSON.parse(savedContacts);
+		}
+    return defaultContacts;
   });
 
-  const updateFeedback = (feedbackType) => {
-    setClicks({
-      ...clicks,
-      [feedbackType]: clicks[feedbackType] + 1,
+  const [filter, setFilter] = useState("");
+
+  const addContact = (newUser) => {
+    setContacts((prevContacts) => {
+      return [...prevContacts, newUser];
     });
   };
-
-  const handleReset = () => {
-    setClicks({
-      ...clicks,
-      good: 0,
-      neutral: 0,
-      bad: 0,
-    });
-  };
-
-  const totalFeedback = clicks.good + clicks.neutral + clicks.bad;
-  const positiveFeedback = Math.round((clicks.good / totalFeedback) * 100);
 
   useEffect(() => {
-    localStorage.setItem("saved-feedback-statistics", JSON.stringify(clicks));
-  }, [clicks]);
+    localStorage.setItem("saved-contacts", JSON.stringify(contacts));
+  }, [contacts]);
+
+  const deleteUser = (contactId) => {
+    setContacts((prevContacts) => {
+      return prevContacts.filter((contact) => contact.id !== contactId);
+    });
+  };
+
+  const visibleContacts = contacts.filter((userContact) =>
+    userContact.name.toLowerCase().includes(filter.toLowerCase())
+  );
+
 
   return (
     <div>
-      <Description />
-
-      <Options
-        onUpdate={updateFeedback}
-        onReset={handleReset}
-        showResetBtn={totalFeedback > 0}
-      />
-
-      <div>
-        {!totalFeedback ? (
-          <Notification />
-        ) : (
-          <Feedback
-          good={clicks.good}
-          neutral={clicks.neutral}
-          bad={clicks.bad}
-            total={totalFeedback}
-            percentFeedback={positiveFeedback}
-          />
-        )}
-        <Chart clicks={clicks}/>
-      </div>
+      <h1>Phonebook</h1>
+      <ContactForm onAdd={addContact} />
+      <SearchBox value={filter} onFilter={setFilter} />
+      <ContactList contacts={visibleContacts} onDelete={deleteUser} />
     </div>
   );
 }
